@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Educação Física & Saúde</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        accent: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header / Navbar Superior -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-emerald-600 to-teal-500 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
+                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 leading-tight text-sm sm:text-base">Quiz de Educação Física</h1>
+                    <p class="text-xs text-slate-500 font-medium">Saúde & Atividade Física</p>
+                </div>
+            </div>
+            
+            <button onclick="openQRModal()" class="flex items-center gap-2 text-xs sm:text-sm bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2 rounded-xl transition font-semibold border border-emerald-200 shadow-xs">
+                <i class="fa-solid fa-qrcode text-base"></i>
+                <span class="hidden sm:inline">Gerar QR Code</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-2xl w-full mx-auto p-4 my-auto flex-grow flex items-center justify-center">
+        
+        <!-- Tela 1: Boas-vindas / Início -->
+        <section id="screen-welcome" class="w-full bg-white p-6 sm:p-10 rounded-3xl shadow-xl border border-slate-100 fade-in text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner rotate-3 hover:rotate-0 transition-transform">
+                <i class="fa-solid fa-person-running text-4xl"></i>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Quiz de Educação Física & Saúde</h2>
+            <p class="text-slate-600 text-sm sm:text-base mb-6 max-w-md mx-auto leading-relaxed">
+                Teste seus conhecimentos sobre <strong>Atividade Física e Exercício Físico</strong>! Você pode ler o texto de apoio antes ou iniciar diretamente.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto mb-2">
+                <button onclick="openTextModal()" class="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold py-3.5 px-5 rounded-xl border border-amber-200 shadow-xs transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-book-open text-base text-amber-600"></i>
+                    <span>Ler Texto de Apoio</span>
+                </button>
+
+                <button onclick="startQuizDirectly()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-200 transition transform active:scale-95 flex items-center justify-center gap-2 text-base">
+                    <span>Iniciar Quiz</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Tela 2: Pergunta Atual -->
+        <section id="screen-quiz" class="w-full bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-100 hidden fade-in">
+            <!-- Barra de Progresso e Botão de Apoio -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+                    <button onclick="openTextModal()" class="text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-md border border-amber-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-book-open"></i> Texto de Apoio
+                    </button>
+                    <span id="question-tracker">Pergunta 1 de 10</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300 w-[10%]"></div>
+                </div>
+            </div>
+
+            <!-- Pergunta -->
+            <h3 id="question-text" class="text-lg sm:text-xl font-bold text-slate-900 mb-6 leading-snug">
+                Carregando pergunta...
+            </h3>
+
+            <!-- Lista de Opções -->
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+
+            <!-- Botão de Ação -->
+            <div class="flex justify-end pt-2">
+                <button id="btn-next" onclick="nextQuestion()" disabled 
+                    class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    <span id="btn-next-text">Próxima</span>
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Tela 3: Resultado / Pontuação Final & Revisão de Erros -->
+        <section id="screen-result" class="w-full bg-white p-6 sm:p-10 rounded-3xl shadow-xl border border-slate-100 hidden fade-in">
+            <div class="text-center">
+                <div id="result-icon-container" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <i id="result-icon" class="text-4xl"></i>
+                </div>
+                
+                <h2 id="result-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">Parabéns!</h2>
+                <p id="result-subtitle" class="text-slate-600 text-sm mb-6">Você concluiu o Quiz de Educação Física.</p>
+                
+                <!-- Card de Pontuação -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-6 max-w-md mx-auto">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Sua Pontuação Final</span>
+                    <div class="text-4xl sm:text-5xl font-black text-emerald-600 mb-2">
+                        <span id="score-text">0</span> <span class="text-2xl text-slate-400 font-semibold">/ 10</span>
+                    </div>
+                    <div id="score-percentage" class="inline-block bg-emerald-100 text-emerald-800 font-bold text-xs px-3 py-1 rounded-full border border-emerald-200">
+                        100% de Aproveitamento
+                    </div>
+                </div>
+
+                <p id="feedback-message" class="text-slate-700 text-sm sm:text-base font-medium mb-8 max-w-md mx-auto">
+                    Excelente resultado!
+                </p>
+            </div>
+
+            <!-- Seção de Revisão de Perguntas Erradas -->
+            <div id="review-section" class="border-t border-slate-200 pt-6 mt-6">
+                <!-- Conteúdo gerado dinamicamente via JS -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto mt-8">
+                <button onclick="resetQuiz()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Refazer Quiz</span>
+                </button>
+                <button onclick="openQRModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-6 rounded-xl border border-slate-300 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>Compartilhar QR Code</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal do QR Code -->
+    <div id="qr-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden fade-in">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 relative">
+            <button onclick="closeQRModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-qrcode text-xl"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-slate-900 mb-1">QR Code do Quiz</h3>
+            <p class="text-xs text-slate-500 mb-4">Aponte a câmera do celular para acessar o quiz em qualquer dispositivo.</p>
+
+            <!-- Container do QR Code -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-center items-center mb-4">
+                <div id="qrcode" class="p-2 bg-white rounded-xl shadow-xs"></div>
+            </div>
+
+            <p id="current-url-text" class="text-[10px] text-slate-400 truncate mb-4 px-2 font-mono bg-slate-100 py-1 rounded-md"></p>
+
+            <div class="flex gap-2">
+                <button onclick="downloadQRCode()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Baixar Imagem</span>
+                </button>
+                <button onclick="closeQRModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-xs transition">
+                    <span>Fechar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Texto de Apoio -->
+    <div id="text-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden fade-in">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative max-h-[85vh] flex flex-col">
+            
+            <button onclick="closeTextModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4 shrink-0">
+                <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Texto de Apoio</h3>
+                    <p class="text-xs text-slate-500">Leia o material do projeto para estudar</p>
+                </div>
+            </div>
+
+            <!-- Corpo do Texto Scrollável -->
+            <div class="overflow-y-auto pr-2 text-slate-700 text-sm leading-relaxed space-y-4 border-t border-b border-slate-100 py-4 my-2">
+                <h4 class="font-bold text-slate-900 text-base">Atividade física e exercício físico: importância para a saúde</h4>
+                <p>A atividade física e o exercício físico são fundamentais para a manutenção da saúde e para a melhoria da qualidade de vida. Embora os dois conceitos estejam relacionados, eles possuem diferenças importantes. A atividade física corresponde a qualquer movimento corporal produzido pelos músculos que exige gasto de energia, como caminhar, subir escadas, dançar, brincar, limpar a casa ou passear com um animal. Já o exercício físico é um tipo específico de atividade física, realizado de maneira planejada, organizada e repetitiva, com o objetivo de melhorar ou manter a condição física, como acontece na musculação, na corrida, na natação e no treinamento funcional.</p>
+                <p>A prática regular dessas atividades proporciona benefícios para o corpo e para a mente. No sistema cardiovascular, ajuda a fortalecer o coração, melhorar a circulação sanguínea e controlar a pressão arterial. Também contribui para a regulação da glicose no sangue, reduzindo o risco de desenvolver diabetes tipo 2. Além disso, auxilia no fortalecimento dos músculos e ossos, melhora a flexibilidade, a coordenação motora, o equilíbrio e a resistência física.</p>
+                <p>Os benefícios também envolvem a saúde mental. A movimentação corporal pode aliviar o estresse, melhorar o humor, favorecer o sono e contribuir para a redução de sintomas de ansiedade e depressão. A prática de esportes coletivos, caminhadas em grupo e outras atividades compartilhadas também estimula a convivência social, a cooperação e o desenvolvimento de relações interessoais.</p>
+                <p>A quantidade de atividade física recomendada varia conforme a idade. Para crianças e adolescentes de 5 a 17 anos, a Organização Mundial da Saúde recomenda uma média de pelo menos 60 minutos diários de atividade física moderada a vigorosa, principalmente aeróbica. Atividades vigorosas e aquelas que fortalecem músculos e ossos devem fazer parte da rotina em pelo menos três dias da semana. Para adultos, a recomendação é de 150 a 300 minutos semanais de atividade moderada, ou de 75 a 150 minutos de atividade vigorosa, além do fortalecimento muscular em pelo menos dois dias por semana. Para pessoas idosas, também são importantes os exercícios que desenvolvem o equilíbrio e ajudam a preservar a autonomia.</p>
+                <p>É importante compreender que uma vida ativa não depende exclusivamente de frequentar uma academia. Pequenas mudanças na rotina, como caminhar até locais próximos, utilizar escadas quando possível, dançar, fazer pausas para se movimentar durante períodos prolongados sentado e realizar atividades ao ar livre, já contribuem para diminuir o sedentarismo. O exercício físico planejado pode complementar esses movimentos cotidianos, oferecendo estímulos específicos para desenvolver força, resistência e condicionamento físico.</p>
+                <p>Para começar, o ideal é escolher atividades agradáveis, adequadas à idade e à condição física, aumentando a intensidade e a duração gradualmente. A regularidade é mais importante do que tentar realizar grandes esforços de uma só vez. Pessoas com doenças, limitações físicas ou dúvidas sobre a prática devem procurar orientação de um profissional de saúde.</p>
+                <p>Portanto, a atividade física e o exercício físico são importantes em todas as fases da vida. Incorporá-los à rotina ajuda a prevenir doenças, preservar as capacidades físicas e mentais e promover maior disposição e independência. Como destaca o folder Saúde em Movimento, qualquer quantidade de movimento é melhor do que nenhuma, e nunca é tarde para começar a construir hábitos mais saudáveis.</p>
+            </div>
+
+            <div class="pt-2 shrink-0">
+                <button onclick="closeTextModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl transition text-sm">
+                    Fechar e Voltar ao Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Lógica do Quiz -->
+    <script>
+        // Perguntas, Alternativas e Explicações Detalhadas
+        const questions = [
+            {
+                question: "1. Qual é a principal diferença entre atividade física e exercício físico?",
+                options: [
+                    "A) São exatamente a mesma coisa.",
+                    "B) A atividade física só acontece em academias.",
+                    "C) O exercício físico é planejado, estruturado e repetitivo, enquanto a atividade física inclui movimentos cotidianos.",
+                    "D) O exercício físico não gasta energia."
+                ],
+                answer: 2,
+                explanation: "A atividade física abrange qualquer movimento com gasto energético do dia a dia (limpar casa, caminhar), enquanto o exercício físico é intencional, planejado e estruturado (musculação, corrida)."
+            },
+            {
+                question: "2. Qual alternativa apresenta um exemplo de atividade física que não precisa ser um exercício planejado?",
+                options: [
+                    "A) Musculação.",
+                    "B) Caminhar até a escola.",
+                    "C) Treinamento funcional.",
+                    "D) Treino de corrida estruturado."
+                ],
+                answer: 1,
+                explanation: "Caminhar até a escola é um deslocamento do cotidiano com gasto energético, sem necessidade de um treino planejado."
+            },
+            {
+                question: "3. Qual é um dos benefícios da atividade física para a saúde?",
+                options: [
+                    "A) Aumentar o risco de doenças cardíacas.",
+                    "B) Prejudicar a qualidade do sono.",
+                    "C) Diminuir a força muscular.",
+                    "D) Melhorar a saúde cardiovascular e o bem-estar."
+                ],
+                answer: 3,
+                explanation: "Movimentar o corpo fortalece o coração, melhora a circulação sanguínea, alivia o estresse e traz bem-estar geral."
+            },
+            {
+                question: "4. Segundo as recomendações apresentadas no folder, quanto tempo de atividade física diária é recomendado para pessoas de 5 a 17 anos?",
+                options: [
+                    "A) 15 minutos.",
+                    "B) 30 minutos.",
+                    "C) 60 minutos.",
+                    "D) 120 minutos obrigatoriamente."
+                ],
+                answer: 2,
+                explanation: "Para jovens de 5 a 17 anos, a OMS recomenda uma média de pelo menos 60 minutos diários de atividade física moderada a vigorosa."
+            },
+            {
+                question: "5. Qual é a recomendação semanal de atividade física moderada para adultos de 18 a 64 anos?",
+                options: [
+                    "A) 30 a 60 minutos.",
+                    "B) 75 a 100 minutos.",
+                    "C) 100 a 120 minutos.",
+                    "D) 150 a 300 minutos."
+                ],
+                answer: 3,
+                explanation: "A diretriz para adultos é praticar entre 150 a 300 minutos de atividade física de intensidade moderada por semana."
+            },
+            {
+                question: "6. Como identificar, de maneira prática, uma atividade física moderada?",
+                options: [
+                    "A) É possível conversar, mas não cantar confortavelmente.",
+                    "B) Não é possível falar nenhuma palavra.",
+                    "C) Não há aumento da respiração.",
+                    "D) É necessário permanecer sentado."
+                ],
+                answer: 0,
+                explanation: "Na intensidade moderada, a frequência cardíaca aumenta de forma razoável: você consegue manter uma conversa, mas fica difícil cantar sem perder o fôlego."
+            },
+            {
+                question: "7. Como a atividade física pode beneficiar a saúde mental?",
+                options: [
+                    "A) Aumentando o estresse.",
+                    "B) Prejudicando a concentração.",
+                    "C) Ajudando a melhorar o humor e aliviar o estresse.",
+                    "D) Eliminando a necessidade de dormir."
+                ],
+                answer: 2,
+                explanation: "O exercício estimula a liberação de neurotransmissores que aliviam a ansiedade, melhoram a qualidade do sono e elevam o humor."
+            },
+            {
+                question: "8. Por que a atividade física é importante para pessoas idosas?",
+                options: [
+                    "A) Porque impede qualquer doença relacionada à idade.",
+                    "B) Porque ajuda a preservar a força, o equilíbrio e a independência.",
+                    "C) Porque deve ser realizada somente em academias.",
+                    "D) Porque substitui todos os tratamentos médicos."
+                ],
+                answer: 1,
+                explanation: "Manter-se ativo na terceira idade fortalece ossos e músculos, além de aprimorar o equilíbrio para evitar quedas e manter a autonomia nas tarefas do dia a dia."
+            },
+            {
+                question: "9. Qual das alternativas apresenta uma forma de diminuir o sedentarismo no cotidiano?",
+                options: [
+                    "A) Permanecer sentado durante todo o dia.",
+                    "B) Evitar qualquer caminhada.",
+                    "C) Dormir menos para ter mais tempo livre.",
+                    "D) Fazer pausas para se movimentar e utilizar escadas quando possível."
+                ],
+                answer: 3,
+                explanation: "Trocar o elevador pelas escadas e levantar-se para se xalongar/caminhar durante o dia quebram o tempo sentado e reduzem o sedentarismo."
+            },
+            {
+                question: "10. Qual é a melhor maneira de começar a praticar atividade física?",
+                options: [
+                    "A) Começar com esforços máximos todos os dias.",
+                    "B) Praticar somente quando houver disposição.",
+                    "C) Começar com atividades adequadas à própria condição física e aumentar gradualmente.",
+                    "D) Realizar exercícios sem considerar limitações de saúde."
+                ],
+                answer: 2,
+                explanation: "A regularidade e o progresso gradual de intensidade/duração previnem lesões e garantem a criação de um hábito sustentável."
+            }
+        ];
+
+        // Estado do Quiz
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOptionIndex = null;
+        let userAnswers = [];
+        let qrCodeInstance = null;
+
+        // Iniciar Quiz Diretamente
+        function startQuizDirectly() {
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            loadQuestion();
+        }
+
+        // Modais de Texto
+        function openTextModal() {
+            document.getElementById('text-modal').classList.remove('hidden');
+        }
+
+        function closeTextModal() {
+            document.getElementById('text-modal').classList.add('hidden');
+        }
+
+        // Carregar Pergunta Atual
+        function loadQuestion() {
+            selectedOptionIndex = null;
+            const q = questions[currentQuestionIndex];
+
+            document.getElementById('question-text').textContent = q.question;
+            document.getElementById('question-tracker').textContent = `Pergunta ${currentQuestionIndex + 1} de ${questions.length}`;
+            
+            const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            const btnNext = document.getElementById('btn-next');
+            btnNext.disabled = true;
+            document.getElementById('btn-next-text').textContent = (currentQuestionIndex === questions.length - 1) ? "Finalizar Quiz" : "Próxima";
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-emerald-50/60 hover:border-emerald-300 transition-all flex items-start gap-3 group`;
+                btn.onclick = () => selectOption(idx);
+
+                btn.innerHTML = `
+                    <div class="option-check w-6 h-6 rounded-full border-2 border-slate-300 group-hover:border-emerald-500 flex items-center justify-center shrink-0 mt-0.5 bg-white transition">
+                        <i class="fa-solid fa-check text-xs text-white opacity-0"></i>
+                    </div>
+                    <span class="text-slate-700 font-medium text-sm sm:text-base group-hover:text-emerald-900 leading-snug">${optionText}</span>
+                `;
+
+                container.appendChild(btn);
+            });
+        }
+
+        // Selecionar uma opção
+        function selectOption(index) {
+            selectedOptionIndex = index;
+            const container = document.getElementById('options-container');
+            const buttons = container.querySelectorAll('button');
+
+            buttons.forEach((btn, idx) => {
+                const checkCircle = btn.querySelector('.option-check');
+                const checkIcon = btn.querySelector('.fa-check');
+
+                if (idx === index) {
+                    btn.className = "w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/80 shadow-xs flex items-start gap-3";
+                    checkCircle.className = "option-check w-6 h-6 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5 shadow-xs";
+                    checkIcon.classList.remove('opacity-0');
+                } else {
+                    btn.className = "w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-70 flex items-start gap-3";
+                    checkCircle.className = "option-check w-6 h-6 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0 mt-0.5";
+                    checkIcon.classList.add('opacity-0');
+                }
+            });
+
+            document.getElementById('btn-next').disabled = false;
+        }
+
+        // Próxima Pergunta
+        function nextQuestion() {
+            if (selectedOptionIndex === null) return;
+
+            // Salvar resposta do usuário
+            userAnswers.push(selectedOptionIndex);
+
+            // Verificar resposta
+            if (selectedOptionIndex === questions[currentQuestionIndex].answer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Mostrar Tela Final de Resultado e Revisão das Respostas
+        function showResult() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('score-text').textContent = score;
+            document.getElementById('score-percentage').textContent = `${percentage}% de Aproveitamento`;
+
+            const iconContainer = document.getElementById('result-icon-container');
+            const resultIcon = document.getElementById('result-icon');
+            const resultTitle = document.getElementById('result-title');
+            const resultSubtitle = document.getElementById('result-subtitle');
+            const feedbackMsg = document.getElementById('feedback-message');
+
+            if (score >= 8) {
+                iconContainer.className = "w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner";
+                resultIcon.className = "fa-solid fa-trophy text-4xl";
+                resultTitle.textContent = "Excelente!";
+                resultSubtitle.textContent = "Você demonstrou um ótimo conhecimento em saúde!";
+                feedbackMsg.textContent = "Parabéns! Você domina a diferença entre atividade física e exercício físico e suas recomendações.";
+            } else if (score >= 5) {
+                iconContainer.className = "w-24 h-24 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner";
+                resultIcon.className = "fa-solid fa-medal text-4xl";
+                resultTitle.textContent = "Bom trabalho!";
+                resultSubtitle.textContent = "Você obteve um resultado satisfatório.";
+                feedbackMsg.textContent = "Confira abaixo os pontos de atenção para fixar ainda mais o conteúdo!";
+            } else {
+                iconContainer.className = "w-24 h-24 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner";
+                resultIcon.className = "fa-solid fa-heart-pulse text-4xl";
+                resultTitle.textContent = "Continue estudando!";
+                resultSubtitle.textContent = "Revise o texto de apoio para melhorar sua pontuação.";
+                feedbackMsg.textContent = "Veja abaixo as explicações das perguntas que você errou para aprender a resposta correta.";
+            }
+
+            // Gerar a Seção de Revisão de Erros / Respostas
+            renderReviewSection();
+        }
+
+        // Renderizar Perguntas Erradas / Gabarito no Final
+        function renderReviewSection() {
+            const reviewContainer = document.getElementById('review-section');
+            reviewContainer.innerHTML = '';
+
+            const wrongQuestions = [];
+            questions.forEach((q, index) => {
+                if (userAnswers[index] !== q.answer) {
+                    wrongQuestions.push({
+                        q: q,
+                        questionNum: index + 1,
+                        userChoice: userAnswers[index]
+                    });
+                }
+            });
+
+            if (wrongQuestions.length === 0) {
+                reviewContainer.innerHTML = `
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-star text-xl"></i>
+                        </div>
+                        <h4 class="font-extrabold text-emerald-900 text-lg mb-1">Gabarito Perfeito! 100% de Acertos!</h4>
+                        <p class="text-emerald-700 text-sm">Você respondeu todas as perguntas corretamente e não possui erros a revisar.</p>
+                    </div>
+                `;
+            } else {
+                let html = `
+                    <div class="mb-4 text-left">
+                        <h4 class="font-extrabold text-slate-900 text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-check text-rose-500"></i>
+                            Revisão das Perguntas Erradas (${wrongQuestions.length})
+                        </h4>
+                        <p class="text-slate-500 text-xs">Entenda o motivo de cada resposta com base no texto de apoio:</p>
+                    </div>
+                    <div class="space-y-4 text-left">
+                `;
+
+                wrongQuestions.forEach((item) => {
+                    const q = item.q;
+                    const wrongText = q.options[item.userChoice];
+                    const correctText = q.options[q.answer];
+
+                    html += `
+                        <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                            <h5 class="font-bold text-slate-900 text-sm sm:text-base leading-snug">
+                                ${q.question}
+                            </h5>
+
+                            <div class="space-y-1.5 text-xs sm:text-sm">
+                                <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-xmark text-rose-500 text-base shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <span class="font-bold block text-rose-700">Sua resposta:</span>
+                                        <span>${wrongText}</span>
+                                    </div>
+                                </div>
+
+                                <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-600 text-base shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <span class="font-bold block text-emerald-800">Resposta Correta:</span>
+                                        <span>${correctText}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+                                <span class="font-bold text-amber-800 block mb-0.5">
+                                    <i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i> Por que esta é a correta?
+                                </span>
+                                ${q.explanation}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                reviewContainer.innerHTML = html;
+            }
+        }
+
+        // Reiniciar Quiz
+        function resetQuiz() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+        }
+
+        // Gerar e Abrir Modal do QR Code
+        function openQRModal() {
+            const modal = document.getElementById('qr-modal');
+            const qrContainer = document.getElementById('qrcode');
+            const urlText = document.getElementById('current-url-text');
+            
+            const currentURL = window.location.href;
+            urlText.textContent = currentURL;
+
+            qrContainer.innerHTML = '';
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: currentURL,
+                width: 180,
+                height: 180,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        // Baixar Imagem do QR Code
+        function downloadQRCode() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            const qrImg = document.querySelector('#qrcode img');
+
+            let imageURI = '';
+            if (qrCanvas) {
+                imageURI = qrCanvas.toDataURL("image/png");
+            } else if (qrImg) {
+                imageURI = qrImg.src;
+            }
+
+            if (imageURI) {
+                const link = document.createElement('a');
+                link.download = 'qrcode-quiz-educacao-fisica.png';
+                link.href = imageURI;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>
